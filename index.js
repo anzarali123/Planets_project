@@ -3,7 +3,9 @@ const fs = require('fs');
 const { resourceLimits } = require('worker_threads');
 
 function isHabitablePlanet(planet) {
-    return planet['koi_disposition'] === 'CONFIRMED'
+    return planet['koi_disposition'] === 'CONFIRMED' 
+    && planet['koi_insol'] > 0.36 && planet['koi_insol'] < 1.11
+    && planet['koi_prad'] < 1.6;
 }
 const habitablePlanets = [];
 fs.createReadStream('kepler_data.csv')
@@ -12,15 +14,19 @@ fs.createReadStream('kepler_data.csv')
     columns:true,
 }))
 .on('data',(data) => {
-    if(isHabitablePlanet(data));
-    habitablePlanets.push(data)
+    if(isHabitablePlanet(data)){
+        habitablePlanets.push(data)
+    }
 })
 .on('error',(err) => {
     console.log(err)
 })
 .on('end',() => {
-    console.log(results);
-    console.log('done');
+    console.log(habitablePlanets.map(planet => {
+        return planet['kepler_name'];
+    }))
+    console.log(`${habitablePlanets.length} habitable planets found!`);
 })
+
 
 
